@@ -1,35 +1,29 @@
-function loadJson(url) {
-    return fetch(url)
-        .then(response => response.json());
+let urls = [
+    'https://api.github.com/users/iliakan',
+    'https://api.github.com/users/remy',
+    'https://no-such-url'
+];
+
+if (!Promise.allSettled) { // Полифил для старых браузеров 
+    Promise.allSettled = function (promises) {
+        return Promise.all(promises.map(p => Promise.resolve(p).then(value => ({
+            status: 'fulfilled',
+            value: value
+        }), error => ({
+            status: 'rejected',
+            reason: error
+        }))));
+    };
 }
 
-function loadGitHubUser(name) {
-    return fetch(`https://api.github.com/users/${name}`)
-        .then(response => response.json());
-}
-
-let user = {
-    name: 'Jhonah',
-    age: 29,
-};
-
-function showAvatar(gitHubUser) {
-    return new Promise(function (resolve, reject) {
-        let img = document.createElement('img');
-        img.src = gitHubUser.avatar_url;
-        img.className = "promise-avatar-example";
-        document.body.append(img);
-
-        setTimeout(() => {
-            img.remove()
-            resolve(gitHubUser);
-        }, 3000);
-    });        
-}
-
-//loadJson('/article/promise-chaining/user.json')
-    //.then(user => loadGitHubUser(user.name))
-loadGitHubUser(user.name)
-    .then(showAvatar) // (gitHubUser => showAvatar(gitHubUser))   
-    .then(gitHubUser => alert(`Закончили показ ${gitHubUser.name}`));
-    //... и так далее, другие .then
+Promise.allSettled(urls.map(url => fetch(url)))
+    .then(results => { // (*)
+        results.forEach((result, num) => {
+            if (result.status == "fulfilled") {
+                alert(`${urls[num]}: ${result.value.status}`);
+            }
+            if (result.status == "rejected") {
+                alert(`${urls[num]}: ${result.reason}`);
+            }
+        });
+    });
