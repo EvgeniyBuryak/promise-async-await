@@ -1,29 +1,19 @@
-let urls = [
-    'https://api.github.com/users/iliakan',
-    'https://api.github.com/users/remy',
-    'https://no-such-url'
-];
+let user = {
+    name: 'Jhonah',
+    age: 29,
+};
 
-if (!Promise.allSettled) { // Полифил для старых браузеров 
-    Promise.allSettled = function (promises) {
-        return Promise.all(promises.map(p => Promise.resolve(p).then(value => ({
-            status: 'fulfilled',
-            value: value
-        }), error => ({
-            status: 'rejected',
-            reason: error
-        }))));
-    };
-}
+fetch(`https://api.github.com/users/${user.name}`)
+.then(response => response.json())
+.then(gitHubUser => new Promise((resolve,reject)=>{
+    let img = document.createElement('img');
+    img.src = gitHubUser.avatar_url;
+    img.className = "promise-avatar-example";
+    document.body.append(img);
 
-Promise.allSettled(urls.map(url => fetch(url)))
-    .then(results => { // (*)
-        results.forEach((result, num) => {
-            if (result.status == "fulfilled") {
-                alert(`${urls[num]}: ${result.value.status}`);
-            }
-            if (result.status == "rejected") {
-                alert(`${urls[num]}: ${result.reason}`);
-            }
-        });
-    });
+    setTimeout(() => {
+        img.remove()
+        resolve(gitHubUser);
+    }, 3000);
+}))
+.then(alert("before async/await"));
