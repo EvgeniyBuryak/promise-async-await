@@ -3,17 +3,20 @@ let user = {
     age: 29,
 };
 
-fetch(`https://api.github.com/users/${user.name}`)
-.then(response => response.json())
-.then(gitHubUser => new Promise((resolve,reject)=>{
+async function showAvatar() {
+    let gitHubResponse = await fetch(`https://api.github.com/users/${user.name}`);
+    let gitHubUser = await gitHubResponse.json();
+
     let img = document.createElement('img');
     img.src = gitHubUser.avatar_url;
     img.className = "promise-avatar-example";
     document.body.append(img);
 
-    setTimeout(() => {
-        img.remove()
-        resolve(gitHubUser);
-    }, 3000);
-}))
-.then(alert("before async/await"));
+    await new Promise((resolve, reject) => setTimeout(resolve, 3000));
+
+    img.remove()
+
+    return gitHubUser;
+}
+
+showAvatar();//.then(alert("after async/await"));
